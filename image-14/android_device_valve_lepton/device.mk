@@ -216,3 +216,12 @@ PRODUCT_PACKAGES += strace
 PRODUCT_PACKAGES += gdbserver
 
 PRODUCT_PACKAGES += DocumentsUI
+
+PRODUCT_SOONG_NAMESPACES += external/v4l2_codec2
+
+PRODUCT_PACKAGES += \
+    android.hardware.media.c2@1.2-service-v4l2 \
+    libc2plugin_store \
+    libv4l2_codec2_components \
+    android.hardware.media.bufferpool@1.0
+

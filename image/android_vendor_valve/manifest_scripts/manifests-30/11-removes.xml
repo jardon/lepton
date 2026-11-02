@@ -100,4 +100,6 @@
   <remove-project name="platform/external/vulkan-headers" />
 
   <remove-project name="WayDroid/android_prebuilts_mesa-tools" />
+
+  <remove-project name="platform/external/v4l2_codec2" />
 </manifest>

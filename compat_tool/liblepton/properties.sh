@@ -34,6 +34,19 @@ function setup_props()
         props_echo "ro.lepton.devmode=false"
     fi
 
+    props_echo "ro.vendor.v4l2_codec2.encoder.supported.h264=true"
+    props_echo "ro.vendor.v4l2_codec2.encoder.supported.vp8=true"
+    props_echo "ro.vendor.v4l2_codec2.encoder.supported.vp9=true"
+    props_echo "ro.vendor.v4l2_codec2.decoder.supported.h264=true"
+    props_echo "ro.vendor.v4l2_codec2.decoder.supported.vp8=true"
+    props_echo "ro.vendor.v4l2_codec2.decoder.supported.vp9=true"
+    props_echo "ro.vendor.v4l2_codec2.decoder.supported.hevc=true"
+    props_echo "ro.vendor.v4l2_codec2.decoder.supported.av1=true"
+    props_echo "ro.vendor.v4l2_codec2.decoder.supported.h264.secure=true"
+    props_echo "ro.vendor.v4l2_codec2.decoder.supported.vp8.secure=true"
+    props_echo "ro.vendor.v4l2_codec2.decoder.supported.vp9.secure=true"
+    props_echo "ro.vendor.v4l2_codec2.decoder.supported.hevc.secure=true"
+
     local VAR
     for VAR in $(compgen -A variable LEPTON_GFXRECON_); do
         local OPTION="${VAR#LEPTON_GFXRECON_}"
@@ -52,7 +65,9 @@ function setup_props()
     props_echo "dalvik.vm.usejit=true"
 
     # Video/Rendering props
-    props_echo "debug.stagefright.ccodec=0"
+    props_echo "debug.stagefright.ccodec=1"
+    props_echo "debug.stagefright.c2-poolmask=0xfc0000"
+
     props_echo "ro.opengles.version=196609"
     props_echo "ro.hardware.camera=v4l2"
 

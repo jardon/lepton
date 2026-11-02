@@ -6,4 +6,6 @@
   <remove-project name="WayDroid/android_hardware_waydroid" />
 
   <remove-project name="platform/prebuilts/runtime" />
+
+  <remove-project name="platform/external/v4l2_codec2" />
 </manifest>
