@@ -1,0 +1,43 @@
+From 86ec26cea951db5bce9dcee2b81e4e955f4ea87c Mon Sep 17 00:00:00 2001
+From: Franz-Josef Haider <frajo@frajo.fi>
+Date: Mon, 2 Nov 2026 20:34:33 +0200
+Subject: [PATCH 2/5] lepton: Workaround iris codec issues.
+
+Change-Id: Id507b0d7ae37b27dbfcc98c34de4b26172c7e58e
+---
+ v4l2/V4L2Decoder.cpp | 10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/v4l2/V4L2Decoder.cpp b/v4l2/V4L2Decoder.cpp
+index 52b63b1..0f52d5b 100644
+--- a/v4l2/V4L2Decoder.cpp
++++ b/v4l2/V4L2Decoder.cpp
+@@ -202,7 +202,7 @@ bool V4L2Decoder::setupInputFormat(const uint32_t inputPixelFormat, const size_t
+     }
+ 
+     // Setup the input format.
+-    auto format = mInputQueue->setFormat(inputPixelFormat, ui::Size(), inputBufferSize, 0);
++    auto format = mInputQueue->setFormat(inputPixelFormat, ui::Size(1920, 1080), inputBufferSize, 0);
+     if (!format) {
+         ALOGE("Failed to call IOCTL to set input format.");
+         return false;
+@@ -294,10 +294,14 @@ bool V4L2Decoder::startOutputQueue(size_t minOutputBuffersCount, enum v4l2_memor
+ 
+     const std::optional<struct v4l2_format> format = getFormatInfo();
+     std::optional<size_t> numOutputBuffers = getNumOutputBuffers();
+-    if (!format || !numOutputBuffers) {
++    if (!format) {
+         return false;
+     }
+-    *numOutputBuffers = std::max(*numOutputBuffers, minOutputBuffersCount);
++    if (!numOutputBuffers) {
++        *numOutputBuffers = minOutputBuffersCount + kNumExtraOutputBuffers;
++    } else {
++        *numOutputBuffers = std::max(*numOutputBuffers, minOutputBuffersCount);
++    }
+ 
+     if (mOutputQueue->isStreaming()) {
+         mOutputQueue->streamoff();
+-- 
+2.56.0
+

@@ -1,0 +1,217 @@
+From 1be8059555a668d01dfe8d5f16c59acddb42ae55 Mon Sep 17 00:00:00 2001
+From: Franz-Josef Haider <frajo@frajo.fi>
+Date: Mon, 2 Nov 2026 14:03:51 +0200
+Subject: [PATCH 1/5] Revert "v4l2_codec2: Migrate HAL to AIDL"
+
+This reverts commit be9ddae38017b31e9676d67f597882d761a53ece.
+
+Change-Id: I877e13dadb9be1bcbf6cbb2eb085f644c19cb8f4
+---
+ components/Android.bp                         |  2 +-
+ plugin_store/Android.bp                       |  1 +
+ plugin_store/V4L2PluginStore.cpp              |  2 +-
+ service/Android.bp                            | 10 +++---
+ ...android.hardware.media.c2-service-v4l2.xml |  7 ----
+ ...oid.hardware.media.c2@1.2-service-v4l2.rc} |  2 +-
+ ...oid.hardware.media.c2@1.2-service-v4l2.xml | 11 ++++++
+ service/service.cpp                           | 34 +++++++------------
+ 8 files changed, 33 insertions(+), 36 deletions(-)
+ delete mode 100644 service/android.hardware.media.c2-service-v4l2.xml
+ rename service/{android.hardware.media.c2-service-v4l2.rc => android.hardware.media.c2@1.2-service-v4l2.rc} (85%)
+ create mode 100644 service/android.hardware.media.c2@1.2-service-v4l2.xml
+
+diff --git a/components/Android.bp b/components/Android.bp
+index ecb5fed..5ac4e2d 100644
+--- a/components/Android.bp
++++ b/components/Android.bp
+@@ -12,7 +12,7 @@ cc_library {
+     vendor: true,
+ 
+     defaults: [
+-        "libcodec2-aidl-defaults",
++        "libcodec2-hidl-defaults",
+     ],
+ 
+     srcs: [
+diff --git a/plugin_store/Android.bp b/plugin_store/Android.bp
+index 627f6e7..4eeb52d 100644
+--- a/plugin_store/Android.bp
++++ b/plugin_store/Android.bp
+@@ -32,6 +32,7 @@ cc_library_shared {
+         "libchrome",
+         "libcutils",
+         "libhardware",
++        "libhidlbase",
+         "libnativewindow",
+         "liblog",
+         "libstagefright_bufferpool@1.0",
+diff --git a/plugin_store/V4L2PluginStore.cpp b/plugin_store/V4L2PluginStore.cpp
+index da8c8dd..1ad624c 100644
+--- a/plugin_store/V4L2PluginStore.cpp
++++ b/plugin_store/V4L2PluginStore.cpp
+@@ -93,7 +93,7 @@ C2BlockPool* createBlockPool(C2Allocator::id_t allocatorId, C2BlockPool::local_i
+ 
+     switch (allocatorId) {
+     case V4L2AllocatorId::SECURE_LINEAR:
+-        return new C2PooledBlockPool(allocator, poolId, C2PooledBlockPool::VER_AIDL2);
++        return new C2PooledBlockPool(allocator, poolId);
+ 
+     case V4L2AllocatorId::SECURE_GRAPHIC:
+         return new C2BufferQueueBlockPool(allocator, poolId);
+diff --git a/service/Android.bp b/service/Android.bp
+index 408f229..1da55a6 100644
+--- a/service/Android.bp
++++ b/service/Android.bp
+@@ -11,7 +11,8 @@ cc_defaults {
+     name: "libv4l2_codec2_service",
+ 
+     defaults: [
+-        "libcodec2-aidl-defaults",
++        "hidl_defaults",
++        "libcodec2-hidl-defaults",
+     ],
+     vendor: true,
+     relative_install_path: "hw",
+@@ -26,6 +27,7 @@ cc_defaults {
+         "libavservices_minijail",
+         "libchrome",
+         "libcutils",
++        "libhidlbase",
+         "liblog",
+         "libutils",
+     ],
+@@ -34,7 +36,7 @@ cc_defaults {
+ }
+ 
+ cc_binary {
+-    name: "android.hardware.media.c2-service-v4l2",
++    name: "android.hardware.media.c2@1.2-service-v4l2",
+ 
+     defaults: [
+         "libv4l2_codec2_service",
+@@ -48,6 +50,6 @@ cc_binary {
+         "-DV4L2_CODEC2_SERVICE_V4L2_STORE",
+     ],
+ 
+-    init_rc: ["android.hardware.media.c2-service-v4l2.rc"],
+-    vintf_fragments: ["android.hardware.media.c2-service-v4l2.xml"],
++    init_rc: ["android.hardware.media.c2@1.2-service-v4l2.rc"],
++    vintf_fragments: ["android.hardware.media.c2@1.2-service-v4l2.xml"],
+ }
+diff --git a/service/android.hardware.media.c2-service-v4l2.xml b/service/android.hardware.media.c2-service-v4l2.xml
+deleted file mode 100644
+index c2ee29c..0000000
+--- a/service/android.hardware.media.c2-service-v4l2.xml
++++ /dev/null
+@@ -1,7 +0,0 @@
+-<manifest version="1.0" type="device">
+-    <hal format="aidl">
+-      <name>android.hardware.media.c2</name>
+-      <version>1</version>
+-      <fqname>IComponentStore/default</fqname>
+-    </hal>
+-</manifest>
+diff --git a/service/android.hardware.media.c2-service-v4l2.rc b/service/android.hardware.media.c2@1.2-service-v4l2.rc
+similarity index 85%
+rename from service/android.hardware.media.c2-service-v4l2.rc
+rename to service/android.hardware.media.c2@1.2-service-v4l2.rc
+index f42824b..454e031 100644
+--- a/service/android.hardware.media.c2-service-v4l2.rc
++++ b/service/android.hardware.media.c2@1.2-service-v4l2.rc
+@@ -1,4 +1,4 @@
+-service android-hardware-media-c2-v4l2-hal /vendor/bin/hw/android.hardware.media.c2-service-v4l2
++service android-hardware-media-c2-v4l2-hal /vendor/bin/hw/android.hardware.media.c2@1.2-service-v4l2
+     class hal
+     user media
+     group mediadrm drmrpc
+diff --git a/service/android.hardware.media.c2@1.2-service-v4l2.xml b/service/android.hardware.media.c2@1.2-service-v4l2.xml
+new file mode 100644
+index 0000000..7976a59
+--- /dev/null
++++ b/service/android.hardware.media.c2@1.2-service-v4l2.xml
+@@ -0,0 +1,11 @@
++<manifest version="1.0" type="device">
++    <hal format="hidl">
++      <name>android.hardware.media.c2</name>
++      <transport>hwbinder</transport>
++      <version>1.2</version>
++      <interface>
++          <name>IComponentStore</name>
++          <instance>default</instance>
++      </interface>
++    </hal>
++</manifest>
+diff --git a/service/service.cpp b/service/service.cpp
+index e96c8ba..03865ef 100644
+--- a/service/service.cpp
++++ b/service/service.cpp
+@@ -10,10 +10,9 @@
+ #endif
+ 
+ #include <C2Component.h>
+-#include <android/binder_manager.h>
+-#include <android/binder_process.h>
+ #include <base/logging.h>
+-#include <codec2/aidl/ComponentStore.h>
++#include <codec2/hidl/1.2/ComponentStore.h>
++#include <hidl/HidlTransportSupport.h>
+ #include <log/log.h>
+ #include <minijail.h>
+ 
+@@ -39,8 +38,9 @@ int main(int /* argc */, char** /* argv */) {
+     signal(SIGPIPE, SIG_IGN);
+     android::SetUpMinijail(kBaseSeccompPolicyPath, kExtSeccompPolicyPath);
+ 
+-    ABinderProcess_setThreadPoolMaxThreadCount(16);
+-    ABinderProcess_startThreadPool();
++    // Extra threads may be needed to handle a stacked IPC sequence that
++    // contains alternating binder and hwbinder calls. (See b/35283480.)
++    android::hardware::configureRpcThreadpool(16, true /* callerWillJoin */);
+ 
+ #if LOG_NDEBUG == 0
+     ALOGD("Enable all verbose logging of libchrome");
+@@ -49,34 +49,24 @@ int main(int /* argc */, char** /* argv */) {
+ 
+     // Create IComponentStore service.
+     {
+-        using namespace ::aidl::android::hardware::media::c2;
+-        std::shared_ptr<IComponentStore> store;
++        using namespace ::android::hardware::media::c2::V1_2;
++        android::sp<IComponentStore> store = nullptr;
+ 
+ #ifdef V4L2_CODEC2_SERVICE_V4L2_STORE
+         ALOGD("Instantiating Codec2's V4L2 IComponentStore service...");
+-        store = ::ndk::SharedRefBase::make<utils::ComponentStore>(
+-                android::V4L2ComponentStore::Create());
++        store = new utils::ComponentStore(android::V4L2ComponentStore::Create());
+ #endif
+ 
+         if (store == nullptr) {
+             ALOGE("Cannot create Codec2's IComponentStore service.");
++        } else if (store->registerAsService("default") != android::OK) {
++            ALOGE("Cannot register Codec2's IComponentStore service.");
+         } else {
+-            const std::string serviceName = std::string(IComponentStore::descriptor) + "/default";
+-            binder_exception_t ex =
+-                    AServiceManager_addService(store->asBinder().get(), serviceName.c_str());
+-            if (ex != EX_NONE) {
+-                ALOGE("Cannot register Codec2's IComponentStore service"
+-                      " with instance name \"%s\"",
+-                      serviceName.c_str());
+-            } else {
+-                ALOGD("Codec2's IComponentStore service registered. "
+-                      "Instance name: \"%s\"",
+-                      serviceName.c_str());
+-            }
++            ALOGI("Codec2's IComponentStore service created.");
+         }
+     }
+ 
+-    ABinderProcess_joinThreadPool();
++    android::hardware::joinRpcThreadpool();
+     ALOGD("Service shutdown.");
+     return 0;
+ }
+-- 
+2.56.0
+

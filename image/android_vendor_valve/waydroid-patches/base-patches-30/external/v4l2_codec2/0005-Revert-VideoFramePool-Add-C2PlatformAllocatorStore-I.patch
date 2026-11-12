@@ -1,0 +1,71 @@
+From 4da4996de12e332e8af1c1acea536ffd7dfaad86 Mon Sep 17 00:00:00 2001
+From: Franz-Josef Haider <frajo@frajo.fi>
+Date: Mon, 2 Nov 2026 20:54:19 +0200
+Subject: [PATCH 5/5] Revert "VideoFramePool: Add
+ C2PlatformAllocatorStore::IGBA support"
+
+This reverts commit ad955c44ae8be027960f304d9d73e99ebb39a7f7.
+---
+ components/Android.bp         |  1 -
+ components/VideoFramePool.cpp | 26 --------------------------
+ 2 files changed, 27 deletions(-)
+
+diff --git a/components/Android.bp b/components/Android.bp
+index 5ac4e2d..73efcf2 100644
+--- a/components/Android.bp
++++ b/components/Android.bp
+@@ -44,7 +44,6 @@ cc_library {
+         "libstagefright_bufferqueue_helper",
+         "libstagefright_foundation",
+         "libui",
+-        "libnativewindow",
+         "libv4l2_codec2_common",
+     ],
+ 
+diff --git a/components/VideoFramePool.cpp b/components/VideoFramePool.cpp
+index 91b2daa..10bf4a6 100644
+--- a/components/VideoFramePool.cpp
++++ b/components/VideoFramePool.cpp
+@@ -13,7 +13,6 @@
+ #include <C2BlockInternal.h>
+ #include <bufferpool/BufferPoolTypes.h>
+ 
+-#include <android/hardware_buffer.h>
+ #include <android/hardware/graphics/common/1.0/types.h>
+ #include <base/bind.h>
+ #include <base/memory/ptr_util.h>
+@@ -44,31 +43,6 @@ std::optional<uint32_t> VideoFramePool::getBufferIdFromGraphicBlock(C2BlockPool&
+         }
+         return dmabufId.value();
+     }
+-    case C2PlatformAllocatorStore::IGBA: {
+-        std::shared_ptr<_C2BlockPoolData> blockPoolData =
+-                _C2BlockFactory::GetGraphicBlockPoolData(block);
+-        struct AHardwareBuffer *buf;
+-        if (blockPoolData->getType() != _C2BlockPoolData::TYPE_AHWBUFFER) {
+-            ALOGE("Blockpool type must be AHardwareBuffer for IGBA.");
+-            return std::nullopt;
+-        }
+-        if (!_C2BlockFactory::GetAHardwareBuffer(blockPoolData, &buf)) {
+-            ALOGE("Failed to GetAHardwareBuffer() for IGBA.");
+-            return std::nullopt;
+-        }
+-        uint64_t id;
+-        if (__builtin_available(android 31, *)) {
+-            if (AHardwareBuffer_getId(buf, &id) != OK) {
+-                ALOGE("Failed to getId for AHardwareBuffer.");
+-                return std::nullopt;
+-            }
+-            return static_cast<uint32_t>(id);
+-        } else {
+-            // Fallback for Android 30 and below: use buffer address as ID
+-            id = reinterpret_cast<uint64_t>(buf);
+-            return static_cast<uint32_t>(id);
+-        }
+-    }
+     case C2PlatformAllocatorStore::GRALLOC:
+         FALLTHROUGH;
+     case V4L2AllocatorId::SECURE_LINEAR: {
+-- 
+2.56.0
+

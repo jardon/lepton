@@ -449,11 +449,6 @@ function setup_podman_mounts()
     local DEV_NODES=(
         zero null full fuse tty char
 
-        # V4L2 video devices (Note: explicitly do not share 99, we use that for screen broadcasting)
-        # Update: Elliot is explicitly disabling this for now, until we decide that we _want_
-        # to support reading in video in Lepton.
-        #video{0..11} video-dec0
-
         # Shared memory
         shm
 
@@ -484,6 +479,16 @@ function setup_podman_mounts()
     for dev in "${DEV_NODES[@]}"; do
         if [[ -e "/dev/${dev}" ]]; then
             podman_mount_entry "/dev/${dev}" "/dev/${dev}" rw
+        fi
+    done
+
+    # v4l2_codec2 only tries the first 10 devices
+    local i=0
+    for _device in video-dec0 video-enc; do
+        device="$(realpath "/dev/${_device}")"
+        if [[ -e "${device}" ]]; then
+            podman_mount_entry "${device}" "/dev/video$i" rw
+            i=$((i + 1))
         fi
     done
 
