@@ -65,7 +65,7 @@ function setup_props()
     props_echo "dalvik.vm.usejit=true"
 
     # Video/Rendering props
-    props_echo "debug.stagefright.ccodec=1"
+    props_echo "debug.stagefright.ccodec=4"
     props_echo "debug.stagefright.c2-poolmask=0xfc0000"
 
     props_echo "ro.opengles.version=196609"

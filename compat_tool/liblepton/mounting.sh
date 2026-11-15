@@ -484,7 +484,7 @@ function setup_podman_mounts()
 
     # v4l2_codec2 only tries the first 10 devices
     local i=0
-    for _device in video-dec0 video-enc; do
+    for _device in video-dec0 video-enc0; do
         device="$(realpath "/dev/${_device}")"
         if [[ -e "${device}" ]]; then
             podman_mount_entry "${device}" "/dev/video$i" rw
