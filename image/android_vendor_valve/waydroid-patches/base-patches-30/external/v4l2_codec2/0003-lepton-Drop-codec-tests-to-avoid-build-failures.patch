@@ -1,7 +1,7 @@
-From 2603fcc3588a2c5ef3b3423e69a527261320daee Mon Sep 17 00:00:00 2001
+From 31bf0d4d5caf8e8742a71a0e58a4dd5992fc9d6c Mon Sep 17 00:00:00 2001
 From: Franz-Josef Haider <frajo@frajo.fi>
 Date: Mon, 2 Nov 2026 20:41:00 +0200
-Subject: [PATCH 3/5] lepton: Drop codec tests to avoid build failures.
+Subject: [PATCH 3/6] lepton: Drop codec tests to avoid build failures.
 
 Change-Id: Ic74b55024538111d0d90ec34a87fe1b2d04a42dd
 ---

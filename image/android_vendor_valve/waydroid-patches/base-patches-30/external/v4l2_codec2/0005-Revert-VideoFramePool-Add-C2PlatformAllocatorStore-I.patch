@@ -1,7 +1,7 @@
-From 4da4996de12e332e8af1c1acea536ffd7dfaad86 Mon Sep 17 00:00:00 2001
+From e0f34c1474ab7b0e08d328bcfcab6326af9c957d Mon Sep 17 00:00:00 2001
 From: Franz-Josef Haider <frajo@frajo.fi>
 Date: Mon, 2 Nov 2026 20:54:19 +0200
-Subject: [PATCH 5/5] Revert "VideoFramePool: Add
+Subject: [PATCH 5/6] Revert "VideoFramePool: Add
  C2PlatformAllocatorStore::IGBA support"
 
 This reverts commit ad955c44ae8be027960f304d9d73e99ebb39a7f7.

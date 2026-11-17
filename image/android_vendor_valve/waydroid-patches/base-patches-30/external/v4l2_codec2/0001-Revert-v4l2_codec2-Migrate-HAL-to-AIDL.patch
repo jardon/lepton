@@ -1,7 +1,7 @@
-From 1be8059555a668d01dfe8d5f16c59acddb42ae55 Mon Sep 17 00:00:00 2001
+From 2fe0b54d7e65bc85b4d7819212d92f8c402a1f51 Mon Sep 17 00:00:00 2001
 From: Franz-Josef Haider <frajo@frajo.fi>
 Date: Mon, 2 Nov 2026 14:03:51 +0200
-Subject: [PATCH 1/5] Revert "v4l2_codec2: Migrate HAL to AIDL"
+Subject: [PATCH 1/6] Revert "v4l2_codec2: Migrate HAL to AIDL"
 
 This reverts commit be9ddae38017b31e9676d67f597882d761a53ece.
 
