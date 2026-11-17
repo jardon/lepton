@@ -1,7 +1,7 @@
-From 86ec26cea951db5bce9dcee2b81e4e955f4ea87c Mon Sep 17 00:00:00 2001
+From 4d7fc98df1d12256316797f5ac6de10c8a4809aa Mon Sep 17 00:00:00 2001
 From: Franz-Josef Haider <frajo@frajo.fi>
 Date: Mon, 2 Nov 2026 20:34:33 +0200
-Subject: [PATCH 2/5] lepton: Workaround iris codec issues.
+Subject: [PATCH 2/6] lepton: Workaround iris codec issues.
 
 Change-Id: Id507b0d7ae37b27dbfcc98c34de4b26172c7e58e
 ---

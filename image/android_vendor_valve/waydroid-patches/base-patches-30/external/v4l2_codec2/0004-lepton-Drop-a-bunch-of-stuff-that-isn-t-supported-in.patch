@@ -1,21 +1,21 @@
-From 221c08648fcb22ecc9a01347fcbc67ee6b13d0dd Mon Sep 17 00:00:00 2001
+From 90f8cc0fca715f4b904faf9bcf4765a2003ebb9f Mon Sep 17 00:00:00 2001
 From: Franz-Josef Haider <frajo@frajo.fi>
 Date: Mon, 2 Nov 2026 20:49:04 +0200
-Subject: [PATCH 4/5] lepton: Drop a bunch of stuff that isn't supported in
+Subject: [PATCH 4/6] lepton: Drop a bunch of stuff that isn't supported in
  android 11.
 
 Change-Id: Ia3aa82a1ea6519ce73ac9eea6e02e1fc5d411005
 ---
  common/Common.cpp              |  2 +-
- common/Fourcc.cpp              |  2 +-
+ common/Fourcc.cpp              |  3 ++
  common/VideoTypes.cpp          | 10 ++---
  components/DecodeInterface.cpp |  2 +-
  components/EncodeInterface.cpp |  2 +-
  components/VideoFramePool.cpp  | 10 +++--
  service/service.cpp            |  4 +-
- v4l2/V4L2Decoder.cpp           |  6 +--
+ v4l2/V4L2Decoder.cpp           |  3 +-
  v4l2/V4L2Device.cpp            | 68 +++++++++++++++++++---------------
- 9 files changed, 59 insertions(+), 47 deletions(-)
+ 9 files changed, 60 insertions(+), 44 deletions(-)
 
 diff --git a/common/Common.cpp b/common/Common.cpp
 index aba4a19..7f82fcc 100644
@@ -31,15 +31,17 @@ index aba4a19..7f82fcc 100644
          return ((profile >= C2Config::PROFILE_VP9_0) && (profile <= C2Config::PROFILE_VP9_3));
      case VideoCodec::HEVC:
 diff --git a/common/Fourcc.cpp b/common/Fourcc.cpp
-index 9f93b7d..27dc4ed 100644
+index 9f93b7d..4f0bb13 100644
 --- a/common/Fourcc.cpp
 +++ b/common/Fourcc.cpp
-@@ -286,7 +286,7 @@ static_assert(Fourcc::NM12 == V4L2_PIX_FMT_NV12M, "Mismatch Fourcc");
+@@ -286,7 +286,10 @@ static_assert(Fourcc::NM12 == V4L2_PIX_FMT_NV12M, "Mismatch Fourcc");
  static_assert(Fourcc::NM21 == V4L2_PIX_FMT_NV21M, "Mismatch Fourcc");
  static_assert(Fourcc::YM16 == V4L2_PIX_FMT_YUV422M, "Mismatch Fourcc");
  static_assert(Fourcc::MT21 == V4L2_PIX_FMT_MT21C, "Mismatch Fourcc");
--static_assert(Fourcc::P010 == V4L2_PIX_FMT_P010, "Mismatch Fourcc");
-+//static_assert(Fourcc::P010 == V4L2_PIX_FMT_P010, "Mismatch Fourcc");
++#ifdef V4L2_PIX_FMT_P010
++// Android 11 bionic kernel headers predate V4L2_PIX_FMT_P010.
+ static_assert(Fourcc::P010 == V4L2_PIX_FMT_P010, "Mismatch Fourcc");
++#endif
  #ifdef V4L2_PIX_FMT_MM21
  // V4L2_PIX_FMT_MM21 is not yet upstreamed.
  static_assert(Fourcc::MM21 == V4L2_PIX_FMT_MM21, "Mismatch Fourcc");
@@ -164,23 +166,20 @@ index 03865ef..8b0d055 100644
  
  #ifdef V4L2_CODEC2_SERVICE_V4L2_STORE
 diff --git a/v4l2/V4L2Decoder.cpp b/v4l2/V4L2Decoder.cpp
-index 0f52d5b..c8aa156 100644
+index 0f52d5b..1491135 100644
 --- a/v4l2/V4L2Decoder.cpp
 +++ b/v4l2/V4L2Decoder.cpp
-@@ -765,10 +765,10 @@ bool V4L2Decoder::changeResolution() {
+@@ -765,8 +765,9 @@ bool V4L2Decoder::changeResolution() {
      // exists at the same time.
      mVideoFramePool.reset();
      // Use flexible pixel 420 format YCBCR_420_888 for 8-bit and P010 for 10-bit.
--    const std::optional<struct v4l2_format> format = getFormatInfo();
++    // Compare against Fourcc::P010: V4L2_PIX_FMT_P010 is missing from Android 11 bionic headers.
+     const std::optional<struct v4l2_format> format = getFormatInfo();
 -    HalPixelFormat outputFormat = format->fmt.pix_mp.pixelformat == V4L2_PIX_FMT_P010
-+    //const std::optional<struct v4l2_format> format = getFormatInfo();
-+    HalPixelFormat outputFormat = /*format->fmt.pix_mp.pixelformat == V4L2_PIX_FMT_P010
++    HalPixelFormat outputFormat = format && format->fmt.pix_mp.pixelformat == Fourcc::P010
                                            ? HalPixelFormat::YCBCR_P010
--                                          : HalPixelFormat::YCBCR_420_888;
-+                                          : */HalPixelFormat::YCBCR_420_888;
+                                           : HalPixelFormat::YCBCR_420_888;
      mVideoFramePool =
-             mGetPoolCb.Run(mCodedSize, outputFormat, mOutputQueue->allocatedBuffersCount());
-     if (!mVideoFramePool) {
 diff --git a/v4l2/V4L2Device.cpp b/v4l2/V4L2Device.cpp
 index f8df182..2903e8f 100644
 --- a/v4l2/V4L2Device.cpp

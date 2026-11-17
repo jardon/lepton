@@ -2,17 +2,17 @@
 <MediaCodecs>
     <Decoders>
         <MediaCodec name="c2.v4l2.hevc.decoder" type="video/hevc" rank="0">
-            <Limit name="size" min="2x2" max="4096x4096"/>
+            <Limit name="size" min="2x2" max="8192x8192"/>
             <Limit name="alignment" value="2x2"/>
             <Feature name="adaptive-playback"/>
         </MediaCodec>
         <MediaCodec name="c2.v4l2.avc.decoder" type="video/avc" rank="0">
-            <Limit name="size" min="2x2" max="4096x4096"/>
+            <Limit name="size" min="2x2" max="8192x8192"/>
             <Limit name="alignment" value="2x2"/>
             <Feature name="adaptive-playback"/>
         </MediaCodec>
         <MediaCodec name="c2.v4l2.vp9.decoder" type="video/x-vnd.on2.vp9" rank="0">
-            <Limit name="size" min="2x2" max="4096x4096"/>
+            <Limit name="size" min="2x2" max="8192x8192"/>
             <Limit name="alignment" value="2x2"/>
             <Feature name="adaptive-playback"/>
         </MediaCodec>

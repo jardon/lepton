@@ -1,0 +1,32 @@
+From f1aa0a9b283ef39745bd4a19686b30526cb64c03 Mon Sep 17 00:00:00 2001
+From: Franz-Josef Haider <frajo@frajo.fi>
+Date: Tue, 17 Nov 2026 10:41:18 +0000
+Subject: [PATCH 6/6] lepton: Raise the maximum decode area to 8192x8192.
+
+---
+ components/DecodeComponent.cpp | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/components/DecodeComponent.cpp b/components/DecodeComponent.cpp
+index 00880d7..7f3eac6 100644
+--- a/components/DecodeComponent.cpp
++++ b/components/DecodeComponent.cpp
+@@ -186,10 +186,12 @@ std::unique_ptr<VideoFramePool> DecodeComponent::getVideoFramePool(const ui::Siz
+     }
+ 
+     // (b/157113946): Prevent malicious dynamic resolution change exhausts system memory.
+-    constexpr int kMaximumSupportedArea = 4096 * 4096;
++    // Iris decodes up to 8K, so allow 8192x8192 worth of pixels. Anything the hardware can't
++    // handle is still rejected by the V4L2 driver when the capture format is set.
++    constexpr int kMaximumSupportedArea = 8192 * 8192;
+     if (getArea(size).value_or(INT_MAX) > kMaximumSupportedArea) {
+-        ALOGE("The output size (%dx%d) is larger than supported size (4096x4096)", size.width,
+-              size.height);
++        ALOGE("The output size (%dx%d) is larger than supported area (%d)", size.width,
++              size.height, kMaximumSupportedArea);
+         reportError(C2_BAD_VALUE);
+         return nullptr;
+     }
+-- 
+2.56.0
+
