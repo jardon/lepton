@@ -13,6 +13,10 @@ pushd compat_tool/liblepton/apk_extractor
 make
 popd
 
+pushd compat_tool/liblepton/mdns_publisher
+make
+popd
+
 mkdir -p install
 pushd install
 
@@ -35,7 +39,11 @@ mkdir -p images
 cp -ra ${PROJECT_DIR}/compat_tool/images/rootfs_overlay images
 
 mkdir -p liblepton/apk_extractor/bin
-cp -a ${PROJECT_DIR}/compat_tool/liblepton/apk_extractor/bin/apk-info-extractor liblepton/apk_extractor/bin/apk-info-extractor
+install -m755 ${PROJECT_DIR}/compat_tool/liblepton/apk_extractor/bin/apk-info-extractor liblepton/apk_extractor/bin/apk-info-extractor
+mkdir -p liblepton/mdns_publisher/bin
+install -m755 ${PROJECT_DIR}/compat_tool/liblepton/mdns_publisher/bin/lepton-mdns-publish liblepton/mdns_publisher/bin/lepton-mdns-publish
+mkdir -p liblepton/images/rootfs_overlay/vendor/bin
+
 
 echo "${LEPTON_VERSION}" > version.txt
 
