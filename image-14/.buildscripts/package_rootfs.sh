@@ -70,6 +70,6 @@ pushd "${OUTPUT_DIR}"/rootfs/vendor/apex >/dev/null
 flatten_apexes
 popd >/dev/null
 
-find . -type f -iname '*Bluetooth*.apk' -delete
+find "${OUTPUT_DIR}" -type f -iname '*Bluetooth*.apk' -delete
 
 echo "Done!"
