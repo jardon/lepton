@@ -10,8 +10,17 @@ function is_system_baked() {
 }
 
 
-# Run startup once, to get a `data` directory that we can overlay in the future
-BAKED_SYSTEM_DATA_DIR="${LEPTON_DIR}/../sysbake"
+# Run startup once, to get a `data` directory that we can overlay in the future.
+# Per-profile, so a `game` and a `general` image can each have their own bake.
+function baked_system_data_dir()
+{
+    if is_general; then
+        echo -n "${LEPTON_DIR}/../sysbake-general"
+    else
+        echo -n "${LEPTON_DIR}/../sysbake"
+    fi
+}
+BAKED_SYSTEM_DATA_DIR="$(baked_system_data_dir)"
 function update_baked_system_data()
 {
     if [[ ! -f "$(data_mount_path)/system/packages.xml" ]]; then
@@ -87,7 +96,7 @@ function autobake()
         # The depot does not contain xattrs, so we need to restore them from a
         # file. We perform this always in case someone interrupted the process.
         pushd "${LEPTON_DIR}"/.. >/dev/null || exit
-        setfattr --restore "${LEPTON_DIR}"/../sysbake.xattrs
+        setfattr --restore "${BAKED_SYSTEM_DATA_DIR}".xattrs
         popd >/dev/null || exit
     fi
 }

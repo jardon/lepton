@@ -34,6 +34,35 @@ lepton start app.apk
 lepton start_early_debug
 ```
 
+## Starting the general-purpose Android container:
+
+If a `general` profile image is installed (`lepton start general`), you get a
+persistent, headless, adb-enabled container built from stock-ish AOSP suitable
+for running general Android applications (not just games):
+
+```
+lepton start general
+```
+
+* It runs until killed, just like a `dev` container, but with the full
+  package and service set of the `general` image.
+* Install applications with:
+
+```
+lepton install_app general /path/to/app.apk
+```
+
+and launch them from inside the container with `am start`/`monkey` via
+`lepton attach general` or `lepton exec general`, or over adb:
+
+```
+adb connect $(hostname):5555
+adb -s localhost:5555 install /path/to/app.apk
+adb -s localhost:5555 shell am start -n com.example.app/.MainActivity
+```
+
+* The active image profile is shown by `lepton version`.
+
 ## Preparing a sysbake (in case the rootfs changed, mostly an internal option):
 
 lepton sysbake

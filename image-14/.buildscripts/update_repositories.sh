@@ -17,6 +17,7 @@ fi
 
 
 # Initialize/Update repositories with `repo`
+LEPTON_PROFILE="${LEPTON_PROFILE:-game}"
 mkdir -p "${ROOT_DIR}/output"
 pushd "${ROOT_DIR}/output" >/dev/null
     REPO_INIT_ARGS=
@@ -24,7 +25,18 @@ pushd "${ROOT_DIR}/output" >/dev/null
         REPO_INIT_ARGS="--partial-clone --depth=1"
     fi
     if [[ -f .repo/manifest.xml ]]; then
-        repo forall -c 'git reset --hard ; git clean -ffdx' || true
+        # Reset each project back to where it was before any patching, so a
+        # fresh set of patches can be applied for the requested profile.
+        # apply-patches.sh tags projects with `autopatch/*` right after sync.
+        repo forall -c '
+            AUTOPATCH_TAG=$(git tag -l "autopatch/*" | head -n1)
+            if [[ -n "${AUTOPATCH_TAG}" ]]; then
+                git reset --hard "${AUTOPATCH_TAG}"
+            else
+                git reset --hard
+            fi
+            git clean -ffdx
+        ' || true
     else
         repo init $REPO_INIT_ARGS -u https://android.googlesource.com/platform/manifest -b android-14.0.0_r75 -g default,-trusty --git-lfs
     fi
@@ -49,4 +61,8 @@ pushd "${ROOT_DIR}/output" >/dev/null
 
     # Copy in vendored projects
     "${ROOT_DIR}/.buildscripts/copy_vendored_projects.sh"
+
+    # Record the profile this tree was synced for, so a profile switch can be
+    # detected and re-sync/reset performed automatically.
+    echo "${LEPTON_PROFILE}" > "${ROOT_DIR}/output/.lepton_profile"
 popd >/dev/null

@@ -145,6 +145,17 @@ roms_patch_dir="${roms_patch_dir}-${sdkv}"
 cd $patch_dir
 patch_list=`find * -iname "*.patch" | sort -u`
 
+# The `general` profile (LEPTON_PROFILE=general) keeps stock AOSP behavior for
+# apps that expect a full Android system.  Skip the patches that trim
+# system_server services, the process observer that shuts the container down
+# when its single target app exits, and the printing feature removal.
+if [[ "${LEPTON_PROFILE:-game}" == "general" ]]; then
+  patch_list=`echo -e "$patch_list" | grep -v \
+      -e "frameworks/base/0012-lepton-Add-Process-Observer-to-touch-a-file-when-our.patch" \
+      -e "frameworks/base/0013-lepton-disable-many-more-services.patch" \
+      -e "frameworks/native/0012-Remove-printing-feature.patch"`
+fi
+
 apply_patch "$patch_list" "$patch_dir"
 
 echo ""

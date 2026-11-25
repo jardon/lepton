@@ -6,7 +6,9 @@
   * **Lepton** runs as a non-root user without requiring any rootful setup or helpers.
   * Every process inside **Lepton** is running as the same non-root user.  There is no enforced isolation between apps, each app instead should run within its own Android container.
   * **Lepton** disables various Android services that are not required to run games possibly breaking compatibility with some applications.
-  * **Lepton** is not designed for general Android use, instead opting to keep the bare minimum functionality required to launch into games.
+  * **Lepton** ships two image profiles:
+    * The default **game** profile keeps the bare minimum functionality required to launch games from Steam.
+    * The optional **general** profile (built with `./do_build.sh --profile general` in `image-14`) is stock-ish AOSP for running arbitrary Android applications in a persistent container (`lepton start general`), e.g. via adb/`am start`.
   * **Lepton** caches various pieces of state to accelerate Android userspace boot time.
   * **Lepton** is intended to help game developers bring their VR Android games to the Steam Frame.  Other usecases are possible, but were not the focus of development and may lack polish.
 

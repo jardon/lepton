@@ -128,6 +128,9 @@ _lepton_completions()
             local IFS=$'\n'
             COMPREPLY+=( $(compgen -W "$(list_android_games)" -- "$cur") )
 
+            # Built-in persistent contexts (headless dev + general Android)
+            COMPREPLY+=( $(compgen -W "dev general" -- "$cur") )
+
             while IFS= read -r path; do
                 if [[ -d "$path" || "$path" == *.apk ]]; then
                     COMPREPLY+=( "$path" )

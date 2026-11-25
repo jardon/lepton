@@ -4,16 +4,24 @@ set -euo pipefail
 
 OWD=$(pwd)
 
+# Each build profile has its own `sysbake`-style data dir that must line up
+# with what the compat tool computes from `images/profile`.
+LEPTON_PROFILE="${LEPTON_PROFILE:-game}"
+SYSTAKE_DIR_NAME="sysbake"
+if [[ "${LEPTON_PROFILE}" == "general" ]]; then
+    SYSTAKE_DIR_NAME="sysbake-general"
+fi
+
 WORKDIR="/home/steamos/.local/share/Steam/steamapps/lepton"
 mkdir -p "${WORKDIR}"
 
 pushd "${WORKDIR}"
 
-tar -xpf "${OWD}"/compat_tool.tar.zst
-tar -xpf "${OWD}"/rootfs.tar.zst
-mkdir -p sysbake
-tar --xattrs -xpf "${OWD}"/install/sysbake.tar.zst -C sysbake
-cp "${OWD}"/install/sysbake.xattrs .
+tar -xf "${OWD}"/compat_tool.tar.zst -p
+tar -xf "${OWD}"/rootfs.tar.zst -p
+mkdir -p ${SYSTAKE_DIR_NAME}
+tar --xattrs -xf "${OWD}"/install/sysbake.tar.zst -p -C ${SYSTAKE_DIR_NAME}
+cp "${OWD}"/install/sysbake.xattrs ${SYSTAKE_DIR_NAME}.xattrs
 cp -ra "${OWD}"/tests .
 
 export XDG_RUNTIME_DIR=/run/user/$(id -u)
@@ -60,14 +68,16 @@ sudo mkdir -p /sys/fs/cgroup/lepton-early_debug
 sudo mkdir -p /sys/fs/cgroup/lepton-bootchart
 sudo mkdir -p /sys/fs/cgroup/lepton-steamlaunch-3418470
 sudo mkdir -p /sys/fs/cgroup/lepton-test-vulkan.apk
- 
+
 for ((i=1; i<=total; i++)); do
     sudo mkdir -p /sys/fs/cgroup/lepton-test-instance-${i}
 done
 
+sudo mkdir -p /sys/fs/cgroup/lepton-general
+
 sudo chown steamos:steamos -R /sys/fs/cgroup
 sudo chmod 777 -R /sys/fs/cgroup
- 
+
 sudo sh -c "echo $$ > /sys/fs/cgroup/lepton-dev/cgroup.procs"
 sudo sh -c "echo $$ > /sys/fs/cgroup/lepton-test-apk.apk/cgroup.procs"
 sudo sh -c "echo $$ > /sys/fs/cgroup/lepton-steamlaunch-testapp/cgroup.procs"
@@ -76,6 +86,7 @@ sudo sh -c "echo $$ > /sys/fs/cgroup/lepton-early_debug/cgroup.procs"
 sudo sh -c "echo $$ > /sys/fs/cgroup/lepton-bootchart/cgroup.procs"
 sudo sh -c "echo $$ > /sys/fs/cgroup/lepton-steamlaunch-3418470/cgroup.procs"
 sudo sh -c "echo $$ > /sys/fs/cgroup/lepton-test-vulkan.apk/cgroup.procs"
+sudo sh -c "echo $$ > /sys/fs/cgroup/lepton-general/cgroup.procs"
 
 for ((i=1; i<=total; i++)); do
     sudo sh -c "echo $$ > /sys/fs/cgroup/lepton-test-instance-${i}/cgroup.procs"
@@ -145,6 +156,9 @@ case "$1" in
         ;;
     13)
         ${OWD}/tests/test-repeated-start.sh
+        ;;
+    33)
+        ${OWD}/tests/test-general-container.sh
         ;;
 esac
 

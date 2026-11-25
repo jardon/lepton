@@ -20,6 +20,7 @@ MDNS_PUBLISH_PATH="${LEPTON_DIR}/mdns_publisher/bin/lepton-mdns-publish"
 
 # Include our libraries of functionality
 source "${LEPTON_DIR}/utils.sh"
+source "${LEPTON_DIR}/profile.sh"
 source "${LEPTON_DIR}/networking.sh"
 source "${LEPTON_DIR}/mounting.sh"
 source "${LEPTON_DIR}/app_metadata.sh"
@@ -180,7 +181,10 @@ function start_container()
 
     rm -f "$(onexit_path)"
 
-    ROOTFS="$(readlink -f "${LEPTON_DIR}"/../images/rootfs)"
+ROOTFS="$(readlink -f "$(rootfs_path)")"
+    if [[ ! -d "${ROOTFS}" ]]; then
+        die "The '$(is_general && echo general || echo game)' profile rootfs is not installed (expected ${ROOTFS}). Install the matching image, or remove the LEPTON_PROFILE override."
+    fi
     # --init=false is used to make sure our container init runs as PID=1,
     # and to avoid spawning multiple "init" processes.
     # --read-only and --rootfs with the :O option make sure that we don't
@@ -377,7 +381,7 @@ function wait_for_container()
 
 function start_early_debug_container()
 {
-    local ROOTFS="$(readlink -f "${LEPTON_DIR}"/../images/rootfs)"
+    local ROOTFS="$(readlink -f "$(rootfs_path)")"
     # Manually symlink com.android.runtime so that `sh` can startup
     ln -vs "../system/apex/com.android.runtime" "${ROOTFS}/apex/com.android.runtime"
     trap "rm -f ${ROOTFS}/apex/com.android.runtime 2>/dev/null" INT TERM ERR EXIT

@@ -15,9 +15,13 @@
 #
 
 PRODUCT_MAKEFILES := \
-    aosp_lepton_arm64_only:$(LOCAL_DIR)/lepton_arm64_only/aosp_lepton_arm64_only.mk
+    aosp_lepton_arm64_only:$(LOCAL_DIR)/lepton_arm64_only/aosp_lepton_arm64_only.mk \
+    general_lepton_arm64_only:$(LOCAL_DIR)/lepton_arm64_only/general_lepton_arm64_only.mk
 
 COMMON_LUNCH_CHOICES := \
     aosp_lepton_arm64_only-trunk_staging-user \
     aosp_lepton_arm64_only-trunk_staging-userdebug \
     aosp_lepton_arm64_only-trunk_staging-eng \
+    general_lepton_arm64_only-trunk_staging-user \
+    general_lepton_arm64_only-trunk_staging-userdebug \
+    general_lepton_arm64_only-trunk_staging-eng \

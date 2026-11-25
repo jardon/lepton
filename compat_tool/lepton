@@ -76,6 +76,17 @@ if [[ "${SteamAppId:-}" == "3056000" ]] || ( is_start && [[ -z "${LEPTON_CONTEXT
     unset STEAM_COMPAT_DATA_PATH
 fi
 
+# Special-case the general-purpose Android container.  This is a persistent,
+# non-Steam container that runs stock-ish AOSP (the `general` build profile)
+# and is meant for adb-installed Android applications.  Everything else, from
+# the image profile to prop setup, follows from this.
+if [[ "${LEPTON_CONTEXT}" == "general" ]]; then
+    export LEPTON_PROFILE=general
+    unset SteamAppId
+    unset STEAM_COMPAT_INSTALL_PATH
+    unset STEAM_COMPAT_DATA_PATH
+fi
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source "${SCRIPT_DIR}/liblepton/liblepton.sh"
 
@@ -553,6 +564,12 @@ EOF
         println "This even allows you to start multiple dev containers at once:"
         echo
         println "    ${_GREEN}$0 start dev2${_PLAIN}"
+        echo
+        println "The '${_GREEN}general${_PLAIN}' context runs the stock-ish general-purpose"
+        println "Android image (if installed) as a persistent adb-enabled container for"
+        println "arbitrary Android apps:"
+        echo
+        println "    ${_GREEN}$0 start general${_PLAIN}"
         echo
         println "Next, list the currently running containers, along with their container IP addresses, and the port forward for adb:"
         println "You can use this port number (usually 5555) to connect via ${_GREEN}adb connect $(hostname):5555${_PLAIN}"

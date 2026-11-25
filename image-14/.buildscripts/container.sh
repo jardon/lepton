@@ -48,6 +48,12 @@ EOF
     PODMAN_ARGS+=( -v ${HOME}/.ssh:/root/.ssh:ro )
 fi
 
+# Propagate the requested build profile into the container so that
+# build_image.sh and update_repositories.sh pick the right product/patch set.
+if [[ -n "${LEPTON_PROFILE:-}" ]]; then
+    PODMAN_ARGS+=( --env LEPTON_PROFILE=${LEPTON_PROFILE} )
+fi
+
 if [[ -f "${ROOT_DIR}/.buildscripts/.bashrc" ]]; then
     # Mount our `.bashrc` file in as `~/.bashrc`, if it exists
     # This doesn't exist at first and must be baked.

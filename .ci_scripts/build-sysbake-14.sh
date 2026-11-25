@@ -12,6 +12,14 @@ pushd "${WORKDIR}"
 tar -xf "${OWD}"/compat_tool.tar.zst -p
 tar -xf "${OWD}"/rootfs.tar.zst -p
 
+# Each build profile bakes into its own directory, which must match what the
+# compat tool computes from the deployed image's `images/profile` marker.
+# Prefer an explicit env (CI job variable), else fall back to the marker.
+SYSTAKE_DIR_NAME="sysbake"
+if [[ "${LEPTON_PROFILE:-}" == "general" ]] || [[ -f images/profile && "$(cat images/profile)" == "general" ]]; then
+    SYSTAKE_DIR_NAME="sysbake-general"
+fi
+
 export XDG_RUNTIME_DIR=/run/user/$(id -u)
 mkdir -p $XDG_RUNTIME_DIR
 chmod 700 $XDG_RUNTIME_DIR
@@ -78,18 +86,18 @@ exec {xtrace_fd}> "${OWD}/lepton-sysbake-trace.txt"
 export BASH_XTRACEFD="${xtrace_fd}"
 LEPTON_ALLOW_KMSG=true LEPTON_FORCE_SOFTWARE=true LEPTON_DEBUG=true timeout 360s ./lepton sysbake
 
-rm -f "${WORKDIR}/sysbake/lepton-onboot"
-rm -f "${WORKDIR}/sysbake/lepton-on-app-exit"
+rm -f "${WORKDIR}/${SYSTAKE_DIR_NAME}/lepton-onboot"
+rm -f "${WORKDIR}/${SYSTAKE_DIR_NAME}/lepton-on-app-exit"
 # fuse-overlayfs doesn't like this directory:
-rm -rf "${WORKDIR}/sysbake/ssh"
+rm -rf "${WORKDIR}/${SYSTAKE_DIR_NAME}/ssh"
 sudo mkdir -p "${OWD}"/install
 sudo chown steamos:steamos -R "${OWD}"/install
-cp -ra "${WORKDIR}"/sysbake "${OWD}"/install
+cp -ra "${WORKDIR}"/${SYSTAKE_DIR_NAME} "${OWD}"/install
 
-tar --xattrs --zstd -cf "${OWD}"/install/sysbake.tar.zst -C "${WORKDIR}"/sysbake .
+tar --xattrs --zstd -cf "${OWD}"/install/sysbake.tar.zst -C "${WORKDIR}"/${SYSTAKE_DIR_NAME} .
 
 pushd "${WORKDIR}"
-getfattr -R -d -m '-' sysbake > "${OWD}"/install/sysbake.xattrs
+getfattr -R -d -m '-' ${SYSTAKE_DIR_NAME} > "${OWD}"/install/sysbake.xattrs
 popd
 
 popd

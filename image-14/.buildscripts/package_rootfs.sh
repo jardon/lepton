@@ -5,6 +5,16 @@ set -euo pipefail
 IMAGE_DIR="$(dirname "$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )" )"
 OUTPUT_DIR="$(dirname "${IMAGE_DIR}")/compat_tool/images"
 
+# The image profile determines where the extracted rootfs lands.  The
+# `game` profile (default) extracts to `images/rootfs`, the `general`
+# profile extracts to `images/rootfs-general`.  `images/profile` records
+# which profile produced it for the compat tool to pick up.
+LEPTON_PROFILE="${LEPTON_PROFILE:-game}"
+ROOTFS_DIR="rootfs"
+if [[ "${LEPTON_PROFILE}" == "general" ]]; then
+    ROOTFS_DIR="rootfs-general"
+fi
+
 for IMG_FILE in system.img vendor.img; do
     if [[ ! -f "${IMAGE_DIR}/${IMG_FILE}" ]]; then
         echo "ERROR: Cannot find ${IMG_FILE!}" >&2
@@ -31,10 +41,11 @@ sqfs2tar -r vendor "${IMAGE_DIR}/vendor.img" > "${TMP_DIR}/vendor.tar"
 # combine
 tar -A --file="${TMP_DIR}/rootfs.tar" "${TMP_DIR}/vendor.tar"
 
-rm -rf "${OUTPUT_DIR}/rootfs"
-mkdir -p "${OUTPUT_DIR}/rootfs"
-tar -xf "${TMP_DIR}/rootfs.tar" -C "${OUTPUT_DIR}/rootfs"
+rm -rf "${OUTPUT_DIR}/${ROOTFS_DIR}"
+mkdir -p "${OUTPUT_DIR}/${ROOTFS_DIR}"
+tar -xf "${TMP_DIR}/rootfs.tar" -C "${OUTPUT_DIR}/${ROOTFS_DIR}"
 cp "${IMAGE_DIR}/NOTICE.txt" "${OUTPUT_DIR}"
+echo "${LEPTON_PROFILE}" > "${OUTPUT_DIR}/profile"
 
 # Convert apex to flattened apex
 function flatten_apexes()

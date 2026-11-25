@@ -111,8 +111,11 @@ function setup_props()
     props_echo "ro.vndk.lite=true"
     props_echo "ro.product.model=Lepton"
     props_echo "ro.product.manufacturer=Valve"
+    props_echo "ro.lepton.profile=$(lepton_profile)"
 
-    props_echo "ro.steam.running_in_app_container=true"
+    if is_app || is_steamlaunch; then
+        props_echo "ro.steam.running_in_app_container=true"
+    fi
 
     # Set logcat to use a specific buffer size (useful when debugging)
     props_echo "ro.logd.size=${LEPTON_LOGCAT_BUFFER_SIZE:-256K}"
@@ -150,7 +153,8 @@ function setup_props()
     props_echo "waydroid.stub_sensors_hal=1"
 
     # Only show the 2d screen if we're not baking and our app requests it.
-    if ! is_sysbake && app_wants_flatscreen; then
+    # General profile containers are headless by design (adb in, no UI shell).
+    if ! is_general && ! is_sysbake && app_wants_flatscreen; then
         props_echo "waydroid.wayland_display=wayland-0"
         props_echo "waydroid.background_start=false"
         props_echo "lepton.headless=false"
@@ -161,7 +165,9 @@ function setup_props()
     props_echo "lepton.active_app_launch_timeout=${LEPTON_APP_LAUNCH_TIMEOUT:-60}"
 
     # Tell `libsteam_api.so` where to find `libsteamclient.so`
-    props_echo "lepton.steamclient.path=/system/lib64/libsteamclient.so"
+    if is_app || is_steamlaunch; then
+        props_echo "lepton.steamclient.path=/system/lib64/libsteamclient.so"
+    fi
 
     # Tell renderdoc to flip certain behavioral switches for us:
     props_echo "debug.renderdoc.autograntpermissions=1"

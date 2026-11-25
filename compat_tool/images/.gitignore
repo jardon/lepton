@@ -1,2 +1,5 @@
 *.tar.zst
 NOTICE.txt
+profile
+rootfs*/
+sysbake

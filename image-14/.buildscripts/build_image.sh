@@ -9,8 +9,13 @@ if [ ! -f /run/.containerenv ] && [ ! -f /.dockerenv ]; then
     exit 1
 fi
 
+LEPTON_PROFILE="${LEPTON_PROFILE:-game}"
+
 if [[ ! -f "${ROOT_DIR}/output/.repo/manifest.xml" ]]; then
 	echo "Android source checkout not found, automatically running 'update_repositories.sh'"
+	${ROOT_DIR}/.buildscripts/update_repositories.sh $@
+elif [[ "$(cat ${ROOT_DIR}/output/.lepton_profile 2>/dev/null || echo '')" != "${LEPTON_PROFILE}" ]]; then
+	echo "Android source checkout was synced for a different profile, re-syncing for '${LEPTON_PROFILE}'..."
 	${ROOT_DIR}/.buildscripts/update_repositories.sh $@
 fi
 
@@ -34,7 +39,11 @@ pushd "${ROOT_DIR}/output" >/dev/null
     apply-patches
 
     # Set target
-    lunch "${1:-aosp_lepton_arm64_only-ap2a-userdebug}"
+    if [[ "${LEPTON_PROFILE}" == "general" ]]; then
+        lunch "${1:-general_lepton_arm64_only-ap2a-userdebug}"
+    else
+        lunch "${1:-aosp_lepton_arm64_only-ap2a-userdebug}"
+    fi
     get_build_var BUILD_FINGERPRINT
 
     num_procs=$(nproc)

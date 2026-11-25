@@ -35,7 +35,7 @@ BASE_APK=base.apk
 
 function android_sdk_version()
 {
-    cat "${LEPTON_DIR}"/../images/rootfs/system/build.prop | grep ro.build.version.sdk= | sed "s/.*=//g"
+    cat "$(rootfs_path)"/system/build.prop | grep ro.build.version.sdk= | sed "s/.*=//g"
 }
 
 function setup_mounts()
@@ -71,7 +71,7 @@ function setup_mounts()
 
     println "Setting up overlays"
 
-    LEPTON_ROOTFS="${LEPTON_DIR}"/../images/rootfs
+    LEPTON_ROOTFS="$(rootfs_path)"
     LEPTON_OVERLAY="${LEPTON_DIR}"/../images/rootfs_overlay
 
     # Mount some directories that are overlays over our rootfs
@@ -250,7 +250,7 @@ function podman_extract_rootfs_file()
 {
     local FILE="$1"
     local TARGET="$2"
-    cp "${LEPTON_DIR}"/../images/rootfs/"${FILE}" "${TARGET}"
+    cp "$(rootfs_path)"/"${FILE}" "${TARGET}"
 }
 
 function generate_app_launch_rc()

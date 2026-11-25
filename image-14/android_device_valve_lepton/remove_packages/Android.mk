@@ -19,6 +19,16 @@ LOCAL_OVERRIDES_PACKAGES := $(LOCAL_OVERRIDES_PACKAGES) \
     wificond \
     incidentd
 
+# The packages below are trimmed for the `game` profile only.  The
+# `general` profile (see lepton_arm64_only/general_lepton_arm64_only.mk)
+# keeps them so that general Android applications can bind to the providers,
+# telecom/telephony and framework packages they expect even though the
+# container has no real radio/modem hardware.
+#
+# We key off TARGET_PRODUCT rather than a custom PRODUCT_* variable, as it
+# is guaranteed to be visible to all Android.mk files during the build.
+ifneq ($(filter general_lepton_arm64_only,$(TARGET_PRODUCT)),)
+
 # /system/app/*
 LOCAL_OVERRIDES_PACKAGES := $(LOCAL_OVERRIDES_PACKAGES) \
 	BasicDreams \
@@ -120,12 +130,19 @@ LOCAL_OVERRIDES_PACKAGES := $(LOCAL_OVERRIDES_PACKAGES) \
 	Contacts \
 	OneTimeInitializer \
 
+# Telephony framework app.  General apps commonly call into
+# TelephonyManager/ITelephony; keep the phone app for the `general` profile
+# (it reports "no service" when there is no modem).
+LOCAL_OVERRIDES_PACKAGES := $(LOCAL_OVERRIDES_PACKAGES) \
+	com.android.phone
+
+endif
+
 # Frameworks.  To build these, I ran:
 #    find . -name Android.mk -o -name Android.bp > list.txt
 #     xargs grep --color 'name: .*android.hardware.radio.*' < list.txt | cut -f3- -d: | sort -u
 
 LOCAL_OVERRIDES_PACKAGES := $(LOCAL_OVERRIDES_PACKAGES) \
-	com.android.phone \
 	android.hardware.gnss \
 	android.hardware.radio@1.0 \
 	android.hardware.radio@1.1 \
